@@ -4,7 +4,8 @@
 #include "Arduino.h"
 #include "SoftwareSerial.h"
 
-#define BluetoothHC05_RESTART_TIMEOUT 5 // Timeout between turning the Module off and on again when restarting it
+// Timeout between turning the Module off and on again when restarting it
+#define BluetoothHC05_RESTART_TIMEOUT 5
 /** @brief Delay after turning the Module on and setting the Key pin to HIGH, when switching from powered off directly into Bluetooth::CMD_DATA_MODE.
   * Without or with to little of a delay, the module will enter Bluetooth::CMD_MODE instead. */
 #define BluetoothHC05_CMD_DATA_MODE_KEY_DELAY 800 
@@ -13,8 +14,9 @@ class BluetoothHC05{
     public:
         const static bool NO_BAUD_RATE_FOUND = 0;
 
+        /** @brief Enum which represents the different operation Modes of the HC05 Module */
         enum Mode {
-            /** @brief In this mode, the Moduel can be sent AT Commands */
+            /** @brief In this mode, the Module can be sent AT Commands */
             CMD_MODE, 
             /** @brief In this mode, the Module can transmit/receive data via Bluetooth */
             DATA_MODE, 
@@ -46,17 +48,28 @@ class BluetoothHC05{
         void setTimeout(uint16_t timeout);
         size_t write(uint8_t byte);
         size_t write(const char* str);
-        size_t write(const uint8_t* buffer, size_t size);
-        size_t read();
-        int readString();
+        size_t write(uint8_t* buffer, size_t size);
+        size_t writeATCmd(const char* cmd);
+        size_t available();
+        int read();
+        size_t readBytes(byte buffer[], size_t length);
+
 
         /**
-         * @brief Changes the operation mode of the HC05 module.
+         * @brief Changes the operation mode of the HC05 Module.
          * 
          * This Method does not work asynchronously. Depending on its current mode and the new mode, this Method could block the Thread.
-         * @param newMode The new mode of the HC05 module
+         * @param newMode The new mode of the HC05 Module
+         * @return Mode Returns the previous mode
          */
-        void changeMode(Mode newMode);
+        Mode changeMode(Mode newMode);
+
+        /**
+         * @brief Returns the current mode of the HC05 Module
+         * 
+         * @return Mode The current Mode of the HC05 Module
+         */
+        Mode getMode();
 
         /**
          * @brief Determines and returns the Baudrate of the HC05 Module.
@@ -72,9 +85,11 @@ class BluetoothHC05{
         uint8_t mPwrPIN; /** @brief The number of the arduino pin which controls the power to the HC05 Module */
         uint8_t mKeyPIN; /** @brief The number of the arduino pin which is connected to the key pin of the HC05 Module */
         SoftwareSerial* mSerial; /** @brief A pointer of the Serial connection to the HC05 Module */
-        int mBaudRate;
+        uint16_t mBaudRate = 38400;
         Mode mMode; /** The current mode of the HC05 Module */
         bool mIsOn = false;
+
+        
 };
 
 #endif // BluetoothHC05_HEADER

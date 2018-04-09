@@ -12,13 +12,15 @@ BluetoothHC05::BluetoothHC05(uint8_t pwrPIN, uint8_t keyPIN, uint8_t txPIN, uint
     mKeyPIN = keyPIN;
     pinMode(mPwrPIN, OUTPUT);
     pinMode(mKeyPIN, OUTPUT);
+    off();
+    digitalWrite(mKeyPIN, LOW);
 
     // Configure Serial Connection
     mSerial = new SoftwareSerial(rxPIN,txPIN);
     setTimeout(50);
+    mSerial->begin(mBaudRate);
 
-    mMode = CMD_DATA_MODE;
-    changeMode(DATA_MODE);
+    mMode = DATA_MODE;
 }
 
 // BluetoothHC05::~BluetoothHC05();
@@ -38,7 +40,12 @@ bool BluetoothHC05::isOn(bool checkHardware) {
 }
 
 void BluetoothHC05::on() {
+    if(mMode == CMD_DATA_MODE) digitalWrite(mKeyPIN, LOW);
     digitalWrite(mPwrPIN, HIGH);
+    if(mMode == CMD_DATA_MODE) {
+        delay(BluetoothHC05_CMD_DATA_MODE_KEY_DELAY);
+        digitalWrite(mKeyPIN, LOW);
+    }
     mIsOn = true;
 }
 
@@ -59,15 +66,28 @@ size_t BluetoothHC05::write(const char* str) {
     return mSerial->write(str);
 }
 
-size_t BluetoothHC05::write(const uint8_t* buffer, size_t size) {
+size_t BluetoothHC05::write(uint8_t* buffer, size_t size) {
     return mSerial->write(buffer, size);
 }
 
-size_t BluetoothHC05::read() {
+size_t BluetoothHC05::writeATCmd(const char* cmd) {
+    mSerial->write(cmd);
+    mSerial->write("\r\n");
+}
+
+size_t BluetoothHC05::available() {
+    return mSerial->available();
+}
+
+int BluetoothHC05::read() {
     return mSerial->read();
 }
 
-void BluetoothHC05::changeMode(Mode newMode) {
+size_t BluetoothHC05::readBytes(byte buffer[], size_t length) {
+    return mSerial->readBytes(buffer, length);
+}
+
+BluetoothHC05::Mode BluetoothHC05::changeMode(Mode newMode) {
     // Don't do anything if already in the correct mode
     if(mMode == newMode) return;
 
@@ -96,8 +116,14 @@ void BluetoothHC05::changeMode(Mode newMode) {
         digitalWrite(mKeyPIN, HIGH);
     }
 
+    Mode tmp = mMode;
     mMode = newMode;
+    return tmp;
 }
+
+BluetoothHC05::Mode BluetoothHC05::getMode() {
+    return mMode;
+}   
 
 uint16_t BluetoothHC05::determineBaud(uint16_t guess) {
     digitalWrite(mKeyPIN, HIGH);
