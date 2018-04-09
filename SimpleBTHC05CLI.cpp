@@ -16,6 +16,12 @@ bool SimpleBTHC05CLI::sendCmd(SimpleBTHC05* bt, const char* cmd, size_t cmdlen) 
             bt->setMode(HC05Mode::CMD_MODE);
             Serial.println("Switching to CMD_MODE");
         }
+        else if(StringUtils::equals(_cmd, "RESTART", 7)) {
+            Serial.println("Restarting");
+            bt->off();
+            delay(100);
+            bt->on();
+        }
         else if(StringUtils::equals(_cmd, "DATA_MODE", 9)) {
             bt->setMode(HC05Mode::DATA_MODE);
             Serial.println("Switching to DATA_MODE");
