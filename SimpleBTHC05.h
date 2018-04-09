@@ -27,8 +27,10 @@ class SimpleBTHC05 {
          * @param txPIN The number of the Arduino pin which transmits data to the RX pin of the HC05 Module
          * @param rxPIN The number of the Arduino pin which receives data from the TX pin of the HC05 Module
          */
-        SimpleBTHC05(uint8_t pwrPIN, uint8_t keyPIN, uint8_t txPIN, uint8_t rxPIN);
+        SimpleBTHC05(uint8_t pwrPIN, uint8_t keyPIN, uint8_t txPIN, uint8_t rxPIN, uint32_t baudrate);
         ~SimpleBTHC05();
+
+        void setup();
 
         /**
          * @brief Returns true if the HC05 Module is powered.
@@ -58,7 +60,25 @@ class SimpleBTHC05 {
          * @return uint8_t The previous Mode of the HC05 Module
          */
         HC05Mode setMode(HC05Mode newMode);
-
+        /**
+         * @brief Returns the current Baudrate of the HC05 Module while in HC05Mode::DATA_MODE/HC05Mode::CMD_DATA_MODE
+         * 
+         * @return uint32_t The current Baudrate of the HC05 Module
+         */
+        uint32_t getBaudrate();
+        /**
+         * @brief Set the Serial Parameters (Baudrate, Stop Bit, Parity Bit) of the HC05 Module.
+         * 
+         * If \p checkReply is true, this Method waits for the reply of the HC05 Module and confirms if the execution was successfull.
+         * This will take some time due to Serial Communication. 
+         * @param baudrate The new baudrate
+         * @param stopBit The new Stop Bit
+         * @param parityBit The new Parity Bit
+         * @param checkReply If true, confirms if the command was executed successfully (slower)
+         * @return bool True, if execution was successfull
+         */
+        bool setSerialParameters(uint32_t baudrate, bool stopBit=HC05_DEFAULT_STOP_BIT, bool parityBit=HC05_DEFAULT_PARITY_BIT, bool checkReply=false);
+        
     private:
         struct Container {
             uint8_t pwrPin : HC05_BITS_TO_REP_PIN; //< The number of the arduino pin which controls the power to the HC05 Module

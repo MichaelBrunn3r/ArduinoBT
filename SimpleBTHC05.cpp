@@ -1,7 +1,12 @@
 #include "SimpleBTHC05.h"
 #include "HC05.h"
+#include "StringUtils.h"
 
-SimpleBTHC05::SimpleBTHC05(uint8_t pwrPin, uint8_t keyPin, uint8_t txPin, uint8_t rxPin) {
+//////////////////////
+///  Constructor   ///
+//////////////////////
+
+SimpleBTHC05::SimpleBTHC05(uint8_t pwrPin, uint8_t keyPin, uint8_t txPin, uint8_t rxPin, uint32_t baudrate) {
     // Configure Pins
     mContainer.pwrPin = pwrPin;
     mContainer.keyPin = keyPin;
@@ -13,13 +18,20 @@ SimpleBTHC05::SimpleBTHC05(uint8_t pwrPin, uint8_t keyPin, uint8_t txPin, uint8_
     serial->setTimeout(HC05_DEFAULT_SERIAL_TIMEOUT);
     serial->begin(HC05_CMD_MODE_BAUDRATE);
 
-    // Set Serial Parameters
-    mContainer.baudrate = 19200;
-
     // Set initial Mode
     mContainer.mode = HC05Mode::CMD_MODE;
     digitalWrite(mContainer.keyPin, HIGH);
-    off();
+    on();
+
+    mContainer.baudrate = baudrate;
+}
+
+//////////////////////
+/// Public Methods ///
+//////////////////////
+
+void SimpleBTHC05::setup() {
+    setSerialParameters(mContainer.baudrate, HC05_DEFAULT_STOP_BIT, HC05_DEFAULT_PARITY_BIT, true);
 }
 
 bool SimpleBTHC05::isOn() {
@@ -85,4 +97,46 @@ HC05Mode SimpleBTHC05::setMode(HC05Mode newMode) {
     // Set new and return old Mode
     
     return prevMode;
+}
+
+uint32_t SimpleBTHC05::getBaudrate() {
+    return mContainer.baudrate;
+}
+
+bool SimpleBTHC05::setSerialParameters(uint32_t baudrate, bool stopBit, bool parityBit, bool checkReply) {
+    HC05Mode execMode = mContainer.mode; // The Mode the Module was in when this Method was executed (important for when switching Modes)
+    bool success = false;
+
+    size_t atCmdBufSize = 25;
+    char* atCmd = new char[atCmdBufSize]{}; // Buffer for the AT Command that will be sent to the Module to change its Serial Parameters
+    snprintf(atCmd, atCmdBufSize, "AT+UART=%lu,%u,%u\r\n", baudrate, stopBit, parityBit); // Create the AT Command String
+
+    // Send Command
+    if(mContainer.mode == HC05Mode::DATA_MODE) {
+        // Can't send commands in DATA_MODE! First switch to CMD_DATA_MODE
+        setMode(HC05Mode::CMD_DATA_MODE);
+        serial->flush();
+        serial->write(atCmd);
+    } else serial->write(atCmd);
+
+    // If specified: Check reply to confirm if command was successfull
+    if(checkReply && serial->available()) {
+        size_t replyLen = 128;
+        char* reply = new char[replyLen]{};
+        serial->readBytes(reply, replyLen);
+        success = StringUtils::contains(reply, "OK") ;
+    } else success = true; // Else, assume successfull execution
+
+    // If Module was in DATA_MODE, switch back to it
+    if(execMode == HC05Mode::DATA_MODE) setMode(HC05Mode::DATA_MODE);
+
+    // If execution was successfull, save new Serial Parameters
+    if(success) {
+        mContainer.baudrate = baudrate;
+
+        // The Baudrate of DATA_MODE and CMD_DATA_MODE changed. If Module is currently in one of these modes, change the Serial Baudrate
+        if(mContainer.mode == HC05Mode::DATA_MODE || mContainer.mode == HC05Mode::CMD_DATA_MODE) serial->begin(mContainer.baudrate);
+    }
+
+    return success;
 }
