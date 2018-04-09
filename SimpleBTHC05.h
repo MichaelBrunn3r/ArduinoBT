@@ -17,17 +17,15 @@
 
 class SimpleBTHC05 {
     public:
-        SoftwareSerial* serial; /** @brief A pointer of the Serial connection to the HC05 Module */
+        HardwareSerial* serial; /** @brief A pointer of the Serial connection to the HC05 Module */
 
         /**
          * @brief Construct a new SimpleBTHC05 object
          * 
          * @param pwrPIN The number of the Arduino pin which controls the power to the HC05 Module
          * @param keyPIN The number of the Arduino pin which is connected to the key pin of the HC05 Module 
-         * @param txPIN The number of the Arduino pin which transmits data to the RX pin of the HC05 Module
-         * @param rxPIN The number of the Arduino pin which receives data from the TX pin of the HC05 Module
          */
-        SimpleBTHC05(uint8_t pwrPIN, uint8_t keyPIN, uint8_t txPIN, uint8_t rxPIN, uint32_t baudrate);
+        SimpleBTHC05(HardwareSerial* serial, uint8_t pwrPIN, uint8_t keyPIN, uint32_t baudrate);
         ~SimpleBTHC05();
 
         void setup();

@@ -6,7 +6,7 @@
 ///  Constructor   ///
 //////////////////////
 
-SimpleBTHC05::SimpleBTHC05(uint8_t pwrPin, uint8_t keyPin, uint8_t txPin, uint8_t rxPin, uint32_t baudrate) {
+SimpleBTHC05::SimpleBTHC05(HardwareSerial* serial, uint8_t pwrPin, uint8_t keyPin, uint32_t baudrate) {
     // Configure Pins
     mContainer.pwrPin = pwrPin;
     mContainer.keyPin = keyPin;
@@ -14,9 +14,9 @@ SimpleBTHC05::SimpleBTHC05(uint8_t pwrPin, uint8_t keyPin, uint8_t txPin, uint8_
     pinMode(mContainer.keyPin, OUTPUT);
 
     // Configure Serial Connection
-    serial = new SoftwareSerial(rxPin,txPin);
-    serial->setTimeout(HC05_DEFAULT_SERIAL_TIMEOUT);
-    serial->begin(HC05_CMD_MODE_BAUDRATE);
+    this->serial = serial;
+    this->serial->setTimeout(HC05_DEFAULT_SERIAL_TIMEOUT);
+    this->serial->begin(HC05_CMD_MODE_BAUDRATE);
 
     // Set initial Mode
     mContainer.mode = HC05Mode::CMD_MODE;
