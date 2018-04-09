@@ -43,7 +43,7 @@ void BluetoothHC05::on() {
     if(mMode == CMD_DATA_MODE) digitalWrite(mKeyPIN, LOW);
     digitalWrite(mPwrPIN, HIGH);
     if(mMode == CMD_DATA_MODE) {
-        delay(BluetoothHC05_CMD_DATA_MODE_KEY_DELAY);
+        delay(BTHC05_CMD_DATA_MODE_KEY_DELAY);
         digitalWrite(mKeyPIN, LOW);
     }
     mIsOn = true;
@@ -107,12 +107,12 @@ BluetoothHC05::Mode BluetoothHC05::changeMode(Mode newMode) {
 
     // When switching to or from BluetoothHC05::CMD_MODE, restart HC05 Module after a short delay
     if(mMode == CMD_MODE || newMode == CMD_MODE) {
-        delay(BluetoothHC05_RESTART_TIMEOUT);
+        delay(BTHC05_RESTART_TIMEOUT);
         on();
     }
 
     if(newMode == CMD_DATA_MODE) {
-        if(mMode == CMD_MODE) delay(BluetoothHC05_CMD_DATA_MODE_KEY_DELAY);
+        if(mMode == CMD_MODE) delay(BTHC05_CMD_DATA_MODE_KEY_DELAY);
         digitalWrite(mKeyPIN, HIGH);
     }
 
@@ -146,5 +146,5 @@ uint16_t BluetoothHC05::determineBaud(uint16_t guess) {
         }
     }
 
-    return NO_BAUD_RATE_FOUND;
+    return BTHC05_NO_BAUD_RATE_FOUND;
 }

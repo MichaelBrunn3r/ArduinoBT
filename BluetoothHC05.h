@@ -5,15 +5,14 @@
 #include "SoftwareSerial.h"
 
 // Timeout between turning the Module off and on again when restarting it
-#define BluetoothHC05_RESTART_TIMEOUT 5
+#define BTHC05_RESTART_TIMEOUT 5
 /** @brief Delay after turning the Module on and setting the Key pin to HIGH, when switching from powered off directly into Bluetooth::CMD_DATA_MODE.
   * Without or with to little of a delay, the module will enter Bluetooth::CMD_MODE instead. */
-#define BluetoothHC05_CMD_DATA_MODE_KEY_DELAY 800 
+#define BTHC05_CMD_DATA_MODE_KEY_DELAY 800 
+#define BTHC05_NO_BAUD_RATE_FOUND 0;
 
 class BluetoothHC05{
     public:
-        const static bool NO_BAUD_RATE_FOUND = 0;
-
         /** @brief Enum which represents the different operation Modes of the HC05 Module */
         enum Mode {
             /** @brief In this mode, the Module can be sent AT Commands */
@@ -22,6 +21,11 @@ class BluetoothHC05{
             DATA_MODE, 
             /** @brief In this mode, the Module can transmit/receive data and can be sent AT Commands */
             CMD_DATA_MODE
+        };
+
+        enum Role {
+            SLAVE,
+            MASTER
         };
 
         /**
