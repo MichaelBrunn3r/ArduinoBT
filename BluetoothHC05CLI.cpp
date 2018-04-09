@@ -8,7 +8,7 @@ bool startsWith(const char* str, const char* prefix) {
     while ( ( strChar = *_str++ ) & ( prefixChar = *_prefix++ ) ) {
         if ( prefixChar != strChar ) return false;
     }
-    return !prefixChar;
+    return true;
 }
 
 bool equals(const char* str1, const char* str2, size_t strlen) {
