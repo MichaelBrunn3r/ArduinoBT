@@ -4,20 +4,26 @@
 #include "Arduino.h"
 #include "SoftwareSerial.h"
 
+#define BluetoothHC05_RESTART_TIMEOUT 5 // Timeout between turning the Module off and on again when restarting it
+/** @brief Delay after turning the Module on and setting the Key pin to HIGH, when switching from powered off directly into Bluetooth::CMD_DATA_MODE.
+  * Without or with to little of a delay, the module will enter Bluetooth::CMD_MODE instead. */
+#define BluetoothHC05_CMD_DATA_MODE_KEY_DELAY 800 
+
 class BluetoothHC05{
     public:
-        #define BluetoothHC05_RESTART_TIMEOUT 5 // Timeout between turning the Module off and on again when restarting it
-        #define BluetoothHC05_AT_COM_MODE_KEY_DELAY 800
         const static bool NO_BAUD_RATE_FOUND = 0;
 
         enum Mode {
-            AT_COMMAND_MODE, 
-            COMMUNICATION_MODE, 
-            AT_COMMUNICATION_MODE
+            /** @brief In this mode, the Moduel can be sent AT Commands */
+            CMD_MODE, 
+            /** @brief In this mode, the Module can transmit/receive data via Bluetooth */
+            DATA_MODE, 
+            /** @brief In this mode, the Module can transmit/receive data and can be sent AT Commands */
+            CMD_DATA_MODE
         };
 
         /**
-         * @brief Construct a new Bluetooth H C 0 5 object
+         * @brief Construct a new BluetoothHC05 object
          * 
          * @param pwrPIN The number of the Arduino pin which controls the power to the HC05 Module
          * @param keyPIN The number of the Arduino pin which is connected to the key pin of the HC05 Module 
@@ -44,6 +50,12 @@ class BluetoothHC05{
         size_t read();
         int readString();
 
+        /**
+         * @brief Changes the operation mode of the HC05 module.
+         * 
+         * This Method does not work asynchronously. Depending on its current mode and the new mode, this Method could block the Thread.
+         * @param newMode The new mode of the HC05 module
+         */
         void changeMode(Mode newMode);
 
         /**
@@ -60,9 +72,8 @@ class BluetoothHC05{
         uint8_t mPwrPIN; /** @brief The number of the arduino pin which controls the power to the HC05 Module */
         uint8_t mKeyPIN; /** @brief The number of the arduino pin which is connected to the key pin of the HC05 Module */
         SoftwareSerial* mSerial; /** @brief A pointer of the Serial connection to the HC05 Module */
-        char* mName; /** @brief The Name of the HC05 Module **/
         int mBaudRate;
-        Mode mMode;
+        Mode mMode; /** The current mode of the HC05 Module */
         bool mIsOn = false;
 };
 

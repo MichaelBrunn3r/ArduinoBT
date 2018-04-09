@@ -2,9 +2,9 @@
 #include "BluetoothHC05.h"
 #include "SoftwareSerial.h"
 
-/////////////////
+////////////////////////////
 // Constructor/Destructor //
-/////////////////
+////////////////////////////
 
 BluetoothHC05::BluetoothHC05(uint8_t pwrPIN, uint8_t keyPIN, uint8_t txPIN, uint8_t rxPIN) {
     // Configure Pins
@@ -17,20 +17,20 @@ BluetoothHC05::BluetoothHC05(uint8_t pwrPIN, uint8_t keyPIN, uint8_t txPIN, uint
     mSerial = new SoftwareSerial(rxPIN,txPIN);
     setTimeout(50);
 
-    mMode = AT_COMMAND_MODE;
-    changeMode(COMMUNICATION_MODE);
+    mMode = CMD_DATA_MODE;
+    changeMode(DATA_MODE);
 }
 
 // BluetoothHC05::~BluetoothHC05();
 
-//////////////////////
+/////////////////////
 // Private Methods //
-//////////////////////
-
-
 /////////////////////
+
+
+////////////////////
 // Public Methods //
-/////////////////////
+////////////////////
 
 bool BluetoothHC05::isOn(bool checkHardware) {
     if(checkHardware) mIsOn = digitalRead(mPwrPIN);
@@ -71,24 +71,28 @@ void BluetoothHC05::changeMode(Mode newMode) {
     // Don't do anything if already in the correct mode
     if(mMode == newMode) return;
 
-    // To switch to or from AT_COMMAND_MODE the HC05 Module has to be restarted
-    if(mMode == AT_COMMAND_MODE || newMode == AT_COMMAND_MODE) off();
+    /**
+     * When switching from or to BluetoothHC05::CMD_MODE, the HC05 Module has the be restarted.
+     * First step is to turn off the module.
+     */
+    if(mMode == CMD_MODE || newMode == CMD_MODE) off();
 
     /**
      * AT_COMMAND_MODE: Key = HIGH
      * COMMUNICATION_MODE: Key = LOW
      * AT_COMMUNICATION_MODE: Key = HIGH
      */
-    if(newMode == AT_COMMAND_MODE) digitalWrite(mKeyPIN, HIGH);
+    if(newMode == CMD_MODE) digitalWrite(mKeyPIN, HIGH);
     else digitalWrite(mKeyPIN, LOW); 
 
-    if(mMode == AT_COMMAND_MODE || newMode == AT_COMMAND_MODE) {
+    // When switching to or from BluetoothHC05::CMD_MODE, restart HC05 Module after a short delay
+    if(mMode == CMD_MODE || newMode == CMD_MODE) {
         delay(BluetoothHC05_RESTART_TIMEOUT);
         on();
     }
 
-    if(newMode == AT_COMMUNICATION_MODE) {
-        if(mMode == AT_COMMAND_MODE) delay(BluetoothHC05_AT_COM_MODE_KEY_DELAY);
+    if(newMode == CMD_DATA_MODE) {
+        if(mMode == CMD_MODE) delay(BluetoothHC05_CMD_DATA_MODE_KEY_DELAY);
         digitalWrite(mKeyPIN, HIGH);
     }
 
