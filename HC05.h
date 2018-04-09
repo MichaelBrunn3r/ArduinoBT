@@ -28,9 +28,12 @@
     #define HC05_RESTART_CMD_DATA_MODE_KEY_DELAY 850 /** Delay after turning the Module on and setting the Key pin to HIGH, when switching from powered off directly into HC05::CMD_DATA_MODE.
                                               *  Without or with to little of a delay, the module will enter HC05::CMD_MODE instead. */
 
-// Definitions concerning Baudrate
-    #define HC05_MAX_BAUDRATE 1382400
+// Definitions concerning Serial Parameters
+    #define HC05_MAX_BAUDRATE 115200
     #define HC05_CMD_MODE_BAUDRATE 38400
     #define HC05_BITS_TO_REP_BAUD BITS_TO_REPRESENT(HC05_MAX_BAUDRATE)
+
+    #define HC05_DEFAULT_STOP_BIT 0
+    #define HC05_DEFAULT_PARITY_BIT 0
 
 #endif // HC05_HEADER
